@@ -7,46 +7,65 @@
 // Set default timezone Asia/Jakarta (WIB)
 date_default_timezone_set('Asia/Jakarta');
 
-if (!function_exists('loadEnv')) {
-    function loadEnv($path = __DIR__ . '/../.env') {
-        if (!file_exists($path)) {
-            return;
-        }
+/**
+ * Bulletproof Environment Loader
+ * Supports .env direct parsing even when putenv/getenv is disabled on shared hosting
+ */
+function getEnvValue(string $key, $default = '') {
+    static $envData = null;
 
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line) || str_starts_with($line, '#')) {
-                continue;
-            }
-
-            if (str_contains($line, '=')) {
-                list($key, $value) = explode('=', $line, 2);
-                $key = trim($key);
-                $value = trim($value);
-                // Remove surrounding quotes
-                $value = trim($value, '"\'');
-                if (!array_key_exists($key, $_SERVER) && !array_key_exists($key, $_ENV)) {
-                    putenv("$key=$value");
-                    $_ENV[$key] = $value;
-                    $_SERVER[$key] = $value;
+    if ($envData === null) {
+        $envData = [];
+        $path = __DIR__ . '/../.env';
+        if (file_exists($path)) {
+            $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                $line = trim($line);
+                if (empty($line) || str_starts_with($line, '#')) {
+                    continue;
+                }
+                if (str_contains($line, '=')) {
+                    list($k, $v) = explode('=', $line, 2);
+                    $k = trim($k);
+                    $v = trim($v, " \t\n\r\0\x0B\"'");
+                    $envData[$k] = $v;
+                    $_ENV[$k] = $v;
+                    $_SERVER[$k] = $v;
+                    if (function_exists('putenv')) {
+                        @putenv("$k=$v");
+                    }
                 }
             }
         }
     }
-}
 
-loadEnv();
+    if (isset($envData[$key])) {
+        return $envData[$key];
+    }
+    if (isset($_ENV[$key])) {
+        return $_ENV[$key];
+    }
+    if (isset($_SERVER[$key])) {
+        return $_SERVER[$key];
+    }
+    if (function_exists('getenv')) {
+        $val = @getenv($key);
+        if ($val !== false) {
+            return $val;
+        }
+    }
+    return $default;
+}
 
 function getDBConnection(): PDO {
     static $pdo = null;
 
     if ($pdo === null) {
-        $host = getenv('DB_HOST') ?: '127.0.0.1';
-        $port = getenv('DB_PORT') ?: '3306';
-        $dbname = getenv('DB_NAME') ?: 'manager_hosting';
-        $user = getenv('DB_USER') ?: 'root';
-        $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+        $host = getEnvValue('DB_HOST', '127.0.0.1');
+        $port = getEnvValue('DB_PORT', '3306');
+        $dbname = getEnvValue('DB_NAME', 'manager_hosting');
+        $user = getEnvValue('DB_USER', 'root');
+        $pass = getEnvValue('DB_PASS', '');
 
         $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
         $options = [
@@ -58,9 +77,8 @@ function getDBConnection(): PDO {
         try {
             $pdo = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $e) {
-            // Log error or die gracefully
             error_log("Database connection failed: " . $e->getMessage());
-            die("Koneksi database gagal. Silakan pastikan server database aktif dan konfigurasi database benar.");
+            die("Koneksi database gagal: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
         }
     }
 
