@@ -3,7 +3,7 @@
 
     <footer class="site-footer">
         <div class="app-container">
-            <p>&copy; <?= date('Y') ?> Sistem Manager Hosting. Seluruh hak cipta dilindungi.</p>
+            <p>&copy; <?= date('Y') ?> Jeffrey Adrian. Sistem Manager Hosting.</p>
         </div>
     </footer>
 
