@@ -39,7 +39,7 @@ function require_auth(): void {
     if (!is_logged_in()) {
         flash_message('warning', 'Sesi Anda telah berakhir. Silakan login kembali.');
         $currentUri = $_SERVER['REQUEST_URI'] ?? '/';
-        header('Location: ' . base_url('pages/login.php?redirect=' . urlencode($currentUri)));
+        header('Location: ' . base_url('?redirect=' . urlencode($currentUri)));
         exit;
     }
 }

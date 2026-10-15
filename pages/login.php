@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= base_url('pages/login.php' . (!empty($redirect) ? '?redirect=' . urlencode($redirect) : '')) ?>" novalidate>
+        <form method="POST" action="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '', ENT_QUOTES, 'UTF-8') ?>" novalidate>
             <?= csrf_field() ?>
 
             <div class="form-group">
