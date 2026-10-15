@@ -140,12 +140,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span>Masuk ke Dashboard</span>
             </button>
         </form>
-
-        <div style="margin-top: 1.75rem; text-align: center; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
-            <p style="font-size: 0.8rem; color: var(--text-faint);">
-                Login default: <code>admin</code> / <code>admin123</code>
-            </p>
-        </div>
     </div>
 
     <script>
