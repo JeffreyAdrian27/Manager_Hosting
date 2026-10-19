@@ -144,9 +144,10 @@ HTML;
 
     // Log to email_logs table
     try {
+        $sentAt = date('Y-m-d H:i:s');
         $logStmt = $pdo->prepare("
             INSERT INTO email_logs (client_id, jenis, tanggal_expired, status, pesan_error, sent_at)
-            VALUES (:client_id, :jenis, :tanggal_expired, :status, :pesan_error, NOW())
+            VALUES (:client_id, :jenis, :tanggal_expired, :status, :pesan_error, :sent_at)
         ");
         $logStmt->execute([
             ':client_id' => $client['id'],
@@ -154,6 +155,7 @@ HTML;
             ':tanggal_expired' => $client['tanggal_expired'],
             ':status' => $status,
             ':pesan_error' => $errorMessage,
+            ':sent_at' => $sentAt,
         ]);
     } catch (PDOException $pe) {
         error_log("Failed to insert email log: " . $pe->getMessage());

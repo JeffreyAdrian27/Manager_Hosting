@@ -27,8 +27,11 @@ $stmt->execute([':id' => $clientId]);
 $client = $stmt->fetch();
 
 if ($client) {
-    $deleteStmt = $pdo->prepare("UPDATE clients SET deleted_at = NOW() WHERE id = :id");
-    $deleteStmt->execute([':id' => $clientId]);
+    $deleteStmt = $pdo->prepare("UPDATE clients SET deleted_at = :deleted_at WHERE id = :id");
+    $deleteStmt->execute([
+        ':deleted_at' => date('Y-m-d H:i:s'),
+        ':id' => $clientId,
+    ]);
     flash_message('success', 'Data klien ' . e($client['nama']) . ' berhasil diarsipkan (soft delete).');
 } else {
     flash_message('warning', 'Data klien tidak ditemukan atau sudah dihapus sebelumnya.');

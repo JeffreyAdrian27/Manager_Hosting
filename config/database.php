@@ -76,6 +76,11 @@ function getDBConnection(): PDO {
 
         try {
             $pdo = new PDO($dsn, $user, $pass, $options);
+            try {
+                $pdo->exec("SET time_zone = '+07:00'");
+            } catch (\Exception $tzEx) {
+                // Fallback jika database host membatasi SET time_zone
+            }
         } catch (PDOException $e) {
             error_log("Database connection failed: " . $e->getMessage());
             die("Koneksi database gagal: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));

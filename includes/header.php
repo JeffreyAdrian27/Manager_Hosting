@@ -18,7 +18,7 @@ $flash = get_flash_message();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($pageTitle) ?></title>
     <meta name="description" content="Sistem Manager Hosting untuk pemantauan masa aktif domain dan pengingat perpanjangan hosting otomatis.">
-    <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/app.css?v=' . (file_exists(__DIR__ . '/../assets/css/app.css') ? filemtime(__DIR__ . '/../assets/css/app.css') : time())) ?>">
 </head>
 <body>
     <header class="site-header">
